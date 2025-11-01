@@ -5,13 +5,11 @@ from sklearn.model_selection import cross_val_score
 from sklearn.metrics import make_scorer, r2_score, mean_squared_error
 import numpy as np
 
-# --- 1. Constants and Paths ---
 DATA_FILE = 'data/kc_house_data.csv'
 DEMOGRAPHICS_FILE = 'data/zipcode_demographics.csv'
 MODEL_FILE = 'model/model.pkl'
 FEATURES_FILE = 'model/model_features.json'
 
-# --- 2. Load Model and Features ---
 try:
     print(f"Loading model from {MODEL_FILE}...")
     model = joblib.load(MODEL_FILE)
@@ -22,25 +20,17 @@ except FileNotFoundError as e:
     print(f"Error: File not found - {e}")
     exit(1)
 
-# --- 3. Load and Prepare Data ---
 print("Loading and preparing training data...")
 try:
     df_house = pd.read_csv(DATA_FILE)
     df_demo = pd.read_csv(DEMOGRAPHICS_FILE)
 
-    # Join demographics data to the house data
     df_full = pd.merge(df_house, df_demo, on='zipcode', how='left')
 
-    # Define X (features) and y (target)
     y = df_full['price']
 
-    # Filter the dataframe to only contain the features the model expects,
-    # in the correct order
     X = df_full[model_features]
 
-    # The original create_model.py script likely dropped NaNs. We replicate that here.
-    # (A preprocessing pipeline would be a better solution)
-    # We must drop NaNs from both X and y alignment.
     combined = pd.concat([X, y], axis=1).dropna()
     X = combined[model_features]
     y = combined['price']
@@ -54,25 +44,20 @@ except KeyError as e:
     print(f"Error: Expected column not found in data - {e}")
     exit(1)
 
-# --- 4. Run Cross-Validation ---
 print("\nStarting Cross-Validation (k=5)...")
 print("This may take a few seconds...")
 
-# We use 'neg_root_mean_squared_error' because scikit-learn aims to maximize scores.
 scoring = {
     'r2': 'r2',
     'rmse': 'neg_root_mean_squared_error'
 }
 
-# We use k=5 (5 folds) as a reasonable default
 try:
     cv_scores_r2 = cross_val_score(model, X, y, cv=5, scoring='r2')
     cv_scores_rmse = cross_val_score(model, X, y, cv=5, scoring='neg_root_mean_squared_error')
 
-    # Convert RMSE scores back to positive numbers
     cv_scores_rmse = -cv_scores_rmse
 
-    # --- 5. Display Results ---
     print("\n--- Evaluation Results (Cross-Validation) ---")
     print(f"  Metrics for model: {MODEL_FILE}\n")
 

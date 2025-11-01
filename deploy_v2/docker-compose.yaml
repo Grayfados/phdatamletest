@@ -19,15 +19,3 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-
-  api:
-    build: .
-    ports:
-      - "5000:5000"
-    environment:
-      - REDIS_HOST=redis
-    depends_on:
-      redis-loader:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy

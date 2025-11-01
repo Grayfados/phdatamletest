@@ -12,7 +12,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score, mean_squared_error
 
-# --- 1. Constants and Configuration ---
 SALES_PATH = "data/kc_house_data.csv"
 DEMOGRAPHICS_PATH = "data/zipcode_demographics.csv"
 OUTPUT_DIR = "model"
@@ -20,73 +19,57 @@ MODEL_V2_NAME = "housing-model-v2"
 MLFLOW_EXPERIMENT_NAME = "phdata-housing-v2"
 
 
-# --- 2. Feature Engineering ---
 def engineer_features(df):
     """Creates new time-based features from the date column."""
     print("Starting feature engineering...")
     df_fe = df.copy()
 
-    # Convert 'date' column to datetime objects
-    # The format in the CSV is '20141013T000000'
     df_fe['date'] = pd.to_datetime(df_fe['date'].str.split('T').str[0], format='%Y%m%d')
 
-    # Create time-based features
     df_fe['sale_year'] = df_fe['date'].dt.year
     df_fe['sale_month'] = df_fe['date'].dt.month
     df_fe['sale_dayofweek'] = df_fe['date'].dt.dayofweek
 
-    # Calculate house age
     df_fe['house_age'] = df_fe['sale_year'] - df_fe['yr_built']
 
-    # Calculate years since renovation (or since built if never renovated)
     df_fe['yrs_since_renovated'] = np.where(
         df_fe['yr_renovated'] == 0,
         df_fe['house_age'],
         df_fe['sale_year'] - df_fe['yr_renovated']
     )
 
-    # Drop original columns that are now replaced or irrelevant
     df_fe = df_fe.drop(['date', 'yr_built', 'yr_renovated', 'id'], axis=1, errors='ignore')
 
     print("Feature engineering complete.")
     return df_fe
 
 
-# --- 3. Data Loading ---
 def load_data(sales_path, demographics_path):
     """Loads, merges, and cleans data for V2 model."""
     print("Loading data...")
     df_sales = pd.read_csv(sales_path, dtype={'zipcode': str})
     df_demo = pd.read_csv(demographics_path, dtype={'zipcode': str})
 
-    # Merge demographics
     df_merged = pd.merge(df_sales, df_demo, on='zipcode', how='left')
 
-    # Separate target variable
     y = df_merged.pop('price')
     X = df_merged
 
     return X, y
 
 
-# --- 4. Preprocessing Pipeline ---
 def build_pipeline(X_train):
     """Builds a ColumnTransformer and Pipeline for the V2 model."""
     print("Building preprocessing pipeline...")
 
-    # Identify numeric and categorical features
-    # 'zipcode' is treated as categorical
-    # Features like 'waterfront', 'view' are also categorical
     numeric_features = X_train.select_dtypes(include=np.number).columns.tolist()
     categorical_features = ['zipcode', 'waterfront', 'view', 'condition', 'grade']
 
-    # Remove categorical features from the numeric list
     numeric_features = [col for col in numeric_features if col not in categorical_features]
 
     print(f"Numeric features ({len(numeric_features)}): {numeric_features}")
     print(f"Categorical features ({len(categorical_features)}): {categorical_features}")
 
-    # Create transformers
     numeric_transformer = Pipeline(steps=[
         ('scaler', StandardScaler())
     ])
@@ -95,7 +78,6 @@ def build_pipeline(X_train):
         ('onehot', OneHotEncoder(handle_unknown='ignore'))
     ])
 
-    # Create the ColumnTransformer
     preprocessor = ColumnTransformer(
         transformers=[
             ('num', numeric_transformer, numeric_features),
@@ -104,7 +86,6 @@ def build_pipeline(X_train):
         remainder='passthrough'  # Keep any columns not specified
     )
 
-    # Create the full model pipeline
     model_pipeline = Pipeline(steps=[
         ('preprocessor', preprocessor),
         ('regressor', RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1))
@@ -113,11 +94,8 @@ def build_pipeline(X_train):
     return model_pipeline, (numeric_features + categorical_features)
 
 
-# --- 5. Main Training Function ---
 def main():
     """Main training and MLflow logging function."""
-
-    # Set up MLflow
     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
     with mlflow.start_run() as run:
@@ -125,27 +103,22 @@ def main():
         print(f"MLflow Run ID: {run_id}")
         mlflow.log_param("model_type", "RandomForestRegressor_v2")
 
-        # Load and process data
         X, y = load_data(SALES_PATH, DEMOGRAPHICS_PATH)
         X = engineer_features(X)
 
-        # Split data
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         mlflow.log_param("test_size", 0.2)
         mlflow.log_param("random_state", 42)
 
-        # Build and train pipeline
         model_pipeline, feature_list = build_pipeline(X_train)
 
         print("Starting model training...")
         model_pipeline.fit(X_train, y_train)
         print("Training complete.")
 
-        # Evaluate model
         print("Evaluating model...")
         y_pred = model_pipeline.predict(X_test)
 
-        # Calculate metrics
         r2 = r2_score(y_test, y_pred)
         rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 
@@ -153,23 +126,16 @@ def main():
         print(f"  R²:   {r2:.4f}")
         print(f"  RMSE: ${rmse:,.2f}")
 
-        # Log metrics to MLflow
         mlflow.log_metric("r2", r2)
         mlflow.log_metric("rmse", rmse)
 
-        # --- Model Versioning and Artifacts ---
-
-        # 1. Log and register the model with MLflow
         print(f"Logging and registering model as '{MODEL_V2_NAME}'...")
         mlflow.sklearn.log_model(
             sk_model=model_pipeline,
-            artifact_path="model",
+            artifact_path="../deploy_v1/model",
             registered_model_name=MODEL_V2_NAME
         )
 
-        # 2. Save artifacts for our *current* Flask API
-        # We save these separately so our simple Flask app doesn't
-        # need to be an MLflow client.
         output_dir = pathlib.Path(OUTPUT_DIR)
         output_dir.mkdir(exist_ok=True)
 
@@ -178,11 +144,8 @@ def main():
 
         joblib.dump(model_pipeline, model_v2_path)
 
-        # The V2 feature list is all columns *before* preprocessing
-        # The pipeline handles the transformation
         json.dump(list(X_train.columns), open(features_v2_path, 'w'))
 
-        # Log these static artifacts to MLflow as well for completeness
         mlflow.log_artifact(str(model_v2_path))
         mlflow.log_artifact(str(features_v2_path))
 

@@ -1,6 +1,3 @@
-# File: housing_wrapper.py
-# (Code in English, as requested)
-
 import mlflow
 import joblib
 import redis
@@ -8,8 +5,6 @@ import json
 import pandas as pd
 import numpy as np
 
-
-# --- Feature Engineering Function ---
 def engineer_features(df):
     """Creates new time-based features from the date column."""
     df_fe = df.copy()
@@ -33,11 +28,7 @@ def engineer_features(df):
     return df_fe
 
 
-# --- MLflow Custom Model Wrapper ---
 class HousingModelWrapper(mlflow.pyfunc.PythonModel):
-
-    # --- NO __init__ method! ---
-
     def load_context(self, context):
         """
         Called when loading the model for serving, NOT when logging.
@@ -88,9 +79,5 @@ class HousingModelWrapper(mlflow.pyfunc.PythonModel):
         return self.model.predict(df_final_features)
 
 
-# --- THIS IS THE FIX ---
-# Add this line at the end of the file (at the module level)
-# This tells MLflow which object IS the model
 print("Registering HousingModelWrapper with mlflow.models.set_model()")
 mlflow.models.set_model(HousingModelWrapper())
-# --- END OF FIX ---

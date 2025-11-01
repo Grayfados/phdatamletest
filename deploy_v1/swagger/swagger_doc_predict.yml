@@ -1,11 +1,11 @@
-summary: Obtém uma predição de preço de imóvel (Endpoint Principal)
+summary: Gets a house price prediction (Main Endpoint)
 description: >
-  Recebe um objeto JSON com todos os dados do imóvel, conforme encontrado
-  em `future_unseen_examples.csv`. O serviço irá automaticamente
-  enriquecer esses dados com informações demográficas (associadas ao 'zipcode')
-  antes de consultar o modelo.
+  Receives a JSON object with all property data, as found
+  in `future_unseen_examples.csv`. The service will automatically
+  enrich this data with demographic information (joined via 'zipcode')
+  before querying the model.
 tags:
-  - Predição
+  - Prediction
 consumes:
   - application/json
 produces:
@@ -14,7 +14,7 @@ parameters:
   - in: body
     name: body
     required: true
-    description: Dados do imóvel para predição.
+    description: Property data for prediction.
     schema:
       type: object
       properties:
@@ -74,7 +74,7 @@ parameters:
           example: 7912
 responses:
   200:
-    description: Predição realizada com sucesso.
+    description: Prediction was successful.
     schema:
       type: object
       properties:
@@ -88,8 +88,8 @@ responses:
           type: integer
           example: 98178
   400:
-    description: "Requisição inválida (JSON vazio ou 'zipcode' ausente)."
+    description: "Invalid request (Empty JSON or missing 'zipcode')."
   404:
-    description: "Dados demográficos não encontrados para o 'zipcode' fornecido."
+    description: "Demographic data not found for the provided 'zipcode'."
   503:
-    description: "Serviço indisponível (modelo ou Redis não carregados)."
+    description: "Service unavailable (Model or Redis not loaded)."

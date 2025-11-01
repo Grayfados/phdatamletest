@@ -1,11 +1,11 @@
-summary: Obtém uma predição de preço de imóvel (Endpoint Bônus)
+summary: Gets a house price prediction (Bonus Endpoint)
 description: >
-  [BÔNUS] Recebe um objeto JSON com os dados do imóvel. O 'zipcode' é
-  obrigatório para a consulta dos dados demográficos. O usuário pode enviar
-  um JSON menor contendo apenas as features que o modelo realmente utiliza
-  (além do zipcode).
+  Receives a JSON object with property data. The 'zipcode'
+  is required for the demographic data lookup. The user can send
+  a smaller JSON containing only the features the model actually uses
+  (plus zipcode).
 tags:
-  - Predição
+  - Prediction
 consumes:
   - application/json
 produces:
@@ -14,7 +14,7 @@ parameters:
   - in: body
     name: body
     required: true
-    description: Dados do imóvel para predição. 'zipcode' é obrigatório.
+    description: Property data for prediction. 'zipcode' is required.
     schema:
       type: object
       properties:
@@ -27,10 +27,9 @@ parameters:
         grade:
           type: integer
           example: 7
-        # ... (outras features do model_features.json) ...
 responses:
   200:
-    description: Predição realizada com sucesso.
+    description: Prediction was successful.
     schema:
       type: object
       properties:
@@ -44,8 +43,8 @@ responses:
           type: integer
           example: 98178
   400:
-    description: "Requisição inválida (JSON vazio ou 'zipcode' ausente)."
+    description: "Invalid request (Empty JSON or missing 'zipcode')."
   404:
-    description: "Dados demográficos não encontrados para o 'zipcode' fornecido."
+    description: "Demographic data not found for the provided 'zipcode'."
   503:
-    description: "Serviço indisponível (modelo ou Redis não carregados)."
+    description: "Service unavailable (Model or Redis not loaded)."
