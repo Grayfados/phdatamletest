@@ -1,0 +1,95 @@
+summary: Obtém uma predição de preço de imóvel (Endpoint Principal)
+description: >
+  Recebe um objeto JSON com todos os dados do imóvel, conforme encontrado
+  em `future_unseen_examples.csv`. O serviço irá automaticamente
+  enriquecer esses dados com informações demográficas (associadas ao 'zipcode')
+  antes de consultar o modelo.
+tags:
+  - Predição
+consumes:
+  - application/json
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    description: Dados do imóvel para predição.
+    schema:
+      type: object
+      properties:
+        bedrooms:
+          type: integer
+          example: 3
+        bathrooms:
+          type: number
+          example: 1.5
+        sqft_living:
+          type: integer
+          example: 1340
+        sqft_lot:
+          type: integer
+          example: 7912
+        floors:
+          type: number
+          example: 1.5
+        waterfront:
+          type: integer
+          example: 0
+        view:
+          type: integer
+          example: 0
+        condition:
+          type: integer
+          example: 3
+        grade:
+          type: integer
+          example: 7
+        sqft_above:
+          type: integer
+          example: 1340
+        sqft_basement:
+          type: integer
+          example: 0
+        yr_built:
+          type: integer
+          example: 1955
+        yr_renovated:
+          type: integer
+          example: 0
+        zipcode:
+          type: integer
+          example: 98178
+        lat:
+          type: number
+          example: 47.5112
+        long:
+          type: number
+          example: -122.257
+        sqft_living15:
+          type: integer
+          example: 1340
+        sqft_lot15:
+          type: integer
+          example: 7912
+responses:
+  200:
+    description: Predição realizada com sucesso.
+    schema:
+      type: object
+      properties:
+        prediction:
+          type: number
+          example: 546320.91
+        model_version:
+          type: string
+          example: "basic_v1"
+        zipcode_used:
+          type: integer
+          example: 98178
+  400:
+    description: "Requisição inválida (JSON vazio ou 'zipcode' ausente)."
+  404:
+    description: "Dados demográficos não encontrados para o 'zipcode' fornecido."
+  503:
+    description: "Serviço indisponível (modelo ou Redis não carregados)."
