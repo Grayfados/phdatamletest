@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: redis-loader-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: redis-loader
+        image: localhost:32000/redis-loader:latest # Imagem do registro interno
+        env:
+        - name: REDIS_HOST
+          value: "redis-service.default.svc.cluster.local" # O nome DNS interno do Redis
+      restartPolicy: Never
+  backoffLimit: 4

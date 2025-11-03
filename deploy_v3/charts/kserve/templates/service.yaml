@@ -1,0 +1,18 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "housing-model-prod"
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: mlflow
+      storageUri: /app
+      containers:
+      - name: kserve-container
+        image: localhost:32000/housing-model:v3
+        env:
+        - name: REDIS_HOST
+          value: "redis-service.default"
+        - name: REDIS_PORT
+          value: "6379"

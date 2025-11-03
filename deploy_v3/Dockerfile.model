@@ -1,0 +1,18 @@
+FROM python:3.9-slim
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY housing_wrapper_v3.py .
+
+COPY model/model_v3.pkl /app/model/
+
+EXPOSE 8080
+
+# Ele vai carregar o wrapper, que por sua vez carrega o .pkl
+CMD ["mlflow", "models", "serve", \
+     "--model-uri", "/app/", \
+     "--host", "0.0.0.0", \
+     "--port", "8080", \
+     "--env-manager", "local"]
