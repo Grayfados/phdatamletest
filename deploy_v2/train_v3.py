@@ -1,7 +1,3 @@
-# File: deploy_v2/train_v3.py (With Nested Run Logging)
-# (Code in English, as requested)
-# This model tunes hyperparameters AND logs every trial as a nested run.
-
 import pandas as pd
 import numpy as np
 import joblib
@@ -19,7 +15,6 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score, mean_squared_error
 from scipy.stats import randint
 
-# --- 1. Constants ---
 SALES_PATH = os.path.join("..", "data", "kc_house_data.csv")
 DEMOGRAPHICS_PATH = os.path.join("..", "data", "zipcode_demographics.csv")
 OUTPUT_DIR = "model"
@@ -27,7 +22,6 @@ MODEL_V3_NAME = "housing-model-v3-production"
 MLFLOW_EXPERIMENT_NAME = "phdata-housing-final"
 
 
-# --- 2. Data Loading ---
 def load_data(sales_path, demographics_path):
     print("Loading data...")
     df_sales = pd.read_csv(sales_path, dtype={'zipcode': str})
@@ -43,7 +37,6 @@ def load_data(sales_path, demographics_path):
     return X, y
 
 
-# --- 3. Preprocessing Pipeline ---
 def build_pipeline(X_train):
     print("Building preprocessing pipeline...")
 
@@ -74,11 +67,9 @@ def build_pipeline(X_train):
     return model_pipeline
 
 
-# --- 4. Main Training Function ---
 def main():
     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
-    # This is the Parent Run
     with mlflow.start_run(run_name="Hyperparameter Tuning") as parent_run:
         print(f"MLflow Parent Run ID: {parent_run.info.run_id}")
 
@@ -90,7 +81,6 @@ def main():
 
         model_pipeline = build_pipeline(X_train)
 
-        # --- Hyperparameter Tuning Setup ---
         param_dist = {
             'regressor__n_estimators': randint(50, 500),
             'regressor__max_depth': randint(10, 100),
@@ -115,25 +105,19 @@ def main():
         search.fit(X_train, y_train)
         print("Tuning complete.")
 
-        # --- NEW: Log all tuning trials as nested runs ---
         print(f"Logging {n_iter_search} child runs for comparison...")
         cv_results = search.cv_results_
 
         for i in range(n_iter_search):
-            # Create a nested run for each trial
             with mlflow.start_run(run_name=f"trial_{i}", nested=True) as child_run:
-                # Log the parameters for this trial
                 params = cv_results['params'][i]
                 mlflow.log_params(params)
 
-                # Log the score for this trial
                 score = cv_results['mean_test_score'][i]
                 mlflow.log_metric("cv_r2", score)
 
         print("Child runs logged.")
-        # --- End of NEW section ---
 
-        # --- Log Best Model details to PARENT run ---
         mlflow.log_param("tuning_n_iter", n_iter_search)
         mlflow.log_metric("best_cv_r2", search.best_score_)
         mlflow.log_params(search.best_params_)
@@ -150,11 +134,9 @@ def main():
         print(f"  Test R²:   {r2:.4f}")
         print(f"  Test RMSE: ${rmse:,.2f}")
 
-        # Log final metrics to the PARENT run
         mlflow.log_metric("test_r2", r2)
         mlflow.log_metric("test_rmse", rmse)
 
-        # --- Save Artifacts ---
         output_dir = pathlib.Path(OUTPUT_DIR)
         output_dir.mkdir(exist_ok=True)
 
@@ -162,12 +144,9 @@ def main():
         joblib.dump(best_model, model_v3_path)
         print(f"Tuned V3 Model artifact saved to {model_v3_path}")
 
-        # Register the *best* model from the PARENT run
-        # This will be picked up by register_wrapper_v3.py
         mlflow.sklearn.log_model(
             sk_model=best_model,
             artifact_path="best_model_artifact"
-            # We don't need to register it here, register_wrapper will do that
         )
         print("Best model artifact logged to parent run.")
 

@@ -1,9 +1,7 @@
-# File: register_wrapper.py (Corrected based on documentation)
 
 import mlflow
 import os
 
-# --- Config ---
 MLFLOW_EXPERIMENT_NAME = "phdata-housing-v2"
 REGISTERED_MODEL_NAME = "housing-model-v2"
 MODEL_V2_ARTIFACT_PATH = "model/model_v2.pkl"
@@ -14,7 +12,6 @@ with mlflow.start_run() as run:
     run_id = run.info.run_id
     print(f"Starting run {run_id} to register the wrapper (Model from Code method)...")
 
-    # 1. Define artifacts the wrapper needs
     artifacts = {
         "model_pipeline": MODEL_V2_ARTIFACT_PATH
     }

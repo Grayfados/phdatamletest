@@ -25,10 +25,8 @@ try:
         print(f"--- Sending sample {index} (zipcode: {payload.get('zipcode')}) ---")
 
         try:
-            # Envia a requisição POST com o payload em JSON
             response = requests.post(API_URL, json=payload)
 
-            # Verifica se a requisição foi bem-sucedida
             if response.status_code == 200:
                 print(f"Success (HTTP {response.status_code}):")
                 print(json.dumps(response.json(), indent=2))
