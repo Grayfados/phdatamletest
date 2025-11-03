@@ -85,7 +85,7 @@ def build_pipeline(X_train):
             ('num', numeric_transformer, numeric_features),
             ('cat', categorical_transformer, categorical_features)
         ],
-        remainder='passthrough'  # Keep any columns not specified
+        remainder='passthrough'
     )
 
     model_pipeline = Pipeline(steps=[
