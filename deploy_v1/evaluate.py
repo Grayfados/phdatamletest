@@ -5,8 +5,8 @@ from sklearn.model_selection import cross_val_score
 from sklearn.metrics import make_scorer, r2_score, mean_squared_error
 import numpy as np
 
-DATA_FILE = 'data/kc_house_data.csv'
-DEMOGRAPHICS_FILE = 'data/zipcode_demographics.csv'
+DATA_FILE = '../data/kc_house_data.csv'
+DEMOGRAPHICS_FILE = '../data/zipcode_demographics.csv'
 MODEL_FILE = 'model/model.pkl'
 FEATURES_FILE = 'model/model_features.json'
 
