@@ -1,0 +1,23 @@
+artifact_path: /mnt/c/Users/Pedro/Documents/ACUBO/repos/phdata/phdatamletest/deploy_v2/mlruns/1/models/m-95ee0a19959b479bbc0f891132ddafed/artifacts
+flavors:
+  python_function:
+    artifacts:
+      model_v3_pipeline:
+        path: artifacts/model_v3.pkl
+        uri: model/model_v3.pkl
+    cloudpickle_version: 3.1.1
+    code: code
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.loaders.code_model
+    model_code_path: /mnt/c/Users/Pedro/Documents/ACUBO/repos/phdata/phdatamletest/deploy_v2/housing_wrapper_v3.py
+    python_version: 3.9.23
+    streamable: false
+mlflow_version: 3.1.4
+model_id: m-95ee0a19959b479bbc0f891132ddafed
+model_size_bytes: 171763075
+model_uuid: m-95ee0a19959b479bbc0f891132ddafed
+prompts: null
+run_id: a462b613532d4847908c11e6727b3142
+utc_time_created: '2025-11-01 18:38:08.822785'

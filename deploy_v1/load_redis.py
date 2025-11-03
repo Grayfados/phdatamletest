@@ -12,7 +12,7 @@ try:
     r.ping()
     print(f"Connected to Redis: {REDIS_HOST}")
 
-    df = pd.read_csv('data/zipcode_demographics.csv')
+    df = pd.read_csv('../data/zipcode_demographics.csv')
     df = df.set_index('zipcode')
 
     for zipcode, row in df.iterrows():

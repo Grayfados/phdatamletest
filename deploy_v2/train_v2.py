@@ -12,8 +12,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score, mean_squared_error
 
-SALES_PATH = "data/kc_house_data.csv"
-DEMOGRAPHICS_PATH = "data/zipcode_demographics.csv"
+SALES_PATH = "../data/kc_house_data.csv"
+DEMOGRAPHICS_PATH = "../data/zipcode_demographics.csv"
 OUTPUT_DIR = "model"
 MODEL_V2_NAME = "housing-model-v2"
 MLFLOW_EXPERIMENT_NAME = "phdata-housing-v2"
@@ -63,6 +63,8 @@ def build_pipeline(X_train):
     print("Building preprocessing pipeline...")
 
     numeric_features = X_train.select_dtypes(include=np.number).columns.tolist()
+    numeric_features.pop('lat')
+    numeric_features.pop('lon')
     categorical_features = ['zipcode', 'waterfront', 'view', 'condition', 'grade']
 
     numeric_features = [col for col in numeric_features if col not in categorical_features]
@@ -132,7 +134,7 @@ def main():
         print(f"Logging and registering model as '{MODEL_V2_NAME}'...")
         mlflow.sklearn.log_model(
             sk_model=model_pipeline,
-            artifact_path="../deploy_v1/model",
+            name="model",
             registered_model_name=MODEL_V2_NAME
         )
 

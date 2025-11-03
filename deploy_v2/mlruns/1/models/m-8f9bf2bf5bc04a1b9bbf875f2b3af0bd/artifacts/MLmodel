@@ -1,0 +1,22 @@
+artifact_path: /mnt/c/Users/Pedro/Documents/ACUBO/repos/phdata/phdatamletest/deploy_v2/mlruns/1/models/m-8f9bf2bf5bc04a1b9bbf875f2b3af0bd/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.9.23
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.3.1
+mlflow_version: 3.1.4
+model_id: m-8f9bf2bf5bc04a1b9bbf875f2b3af0bd
+model_size_bytes: 171748965
+model_uuid: m-8f9bf2bf5bc04a1b9bbf875f2b3af0bd
+prompts: null
+run_id: 2e9ce57d4cf1487cb3c5785f99f6b082
+utc_time_created: '2025-11-01 17:42:42.722529'
